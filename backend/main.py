@@ -49,6 +49,15 @@ def init_db():
     conn.close()
 
 
+def reset_db():
+    conn = sqlite3.connect(DATABASE_PATH)
+    cursor = conn.cursor()
+    cursor.execute("DROP TABLE transactions")
+    conn.commit()
+    conn.close()
+    init_db()
+
+
 # Initialize database
 init_db()
 
@@ -105,6 +114,13 @@ async def get_transactions():
         return transactions
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# Reset database
+@app.post("/reset/")
+async def reset_database():
+    reset_db()
+    return {"message": "Database reset successfully"}
 
 
 # Run app

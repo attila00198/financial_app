@@ -21,6 +21,7 @@
                         <h5 class="card-title">Egyenleg</h5>
                         <p><?= date('Y-m-d') ?></p>
                         <h2 id="balance" class="card-text">0 Ft</h2>
+                        <button class="btn btn-danger" id="resetDatabase" onclick="resetDatabase()">Reset Database</button>
                     </div>
                 </div>
             </div>
@@ -95,7 +96,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="./static/js/app.js"></script>
+    <script defer src="./static/js/app.js"></script>
 </body>
 
 </html>

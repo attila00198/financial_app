@@ -147,6 +147,12 @@ function updateTransactionList() {
     });
 }
 
+// Function to reset the database
+function resetDatabase() {
+    fetch('http://localhost:8000/reset/', { method: 'POST' })
+        .then(() => location.reload());
+}
+
 // Initialize the chart
 function initializeChart() {
     const ctx = document.getElementById('monthlyChart').getContext('2d');
