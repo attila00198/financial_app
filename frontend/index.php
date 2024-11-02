@@ -46,35 +46,79 @@
             </div>
         </div>
 
-        <!-- Chart -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="card-title">Havi áttekintés</h5>
-                <canvas id="monthlyChart"></canvas>
-            </div>
-        </div>
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button
+                    class="nav-link active"
+                    id="home-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#home"
+                    type="button"
+                    role="tab"
+                    aria-controls="home"
+                    aria-selected="true">
+                    Grafikon
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button
+                    class="nav-link"
+                    id="profile-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#profile"
+                    type="button"
+                    role="tab"
+                    aria-controls="profile"
+                    aria-selected="false">
+                    Táblázat
+                </button>
+            </li>
+        </ul>
 
-        <!-- Table -->
-        <div class="d-flex justify-content-between mb-2">
-            <div class="d-flex align-items-center gap-2">
-                <button class="btn btn-primary" id="prev-month"><span> <- </span></button>
-                <p class="m-0 p-2" id="current-month"></p>
-                <button class="btn btn-primary" id="next-month"><span> -> </span></button>
+        <!-- Tab panes -->
+        <div class="tab-content">
+            <div
+                class="tab-pane active"
+                id="home"
+                role="tabpanel"
+                aria-labelledby="home-tab">
+                <!-- Chart -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Havi áttekintés</h5>
+                        <canvas id="monthlyChart"></canvas>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="table-responsive mb-2">
-            <table class="table table-dark">
-                <thead>
-                    <tr>
-                        <th scope="col">Összeg</th>
-                        <th scope="col">Leírás</th>
-                        <th scope="col">Dátum</th>
-                    </tr>
-                </thead>
-                <tbody id="table-body">
-                    <!-- Ide kerülnek az adatok -->
-                </tbody>
-            </table>
+            <div
+                class="tab-pane"
+                id="profile"
+                role="tabpanel"
+                aria-labelledby="profile-tab">
+                <!-- Table -->
+                <div class="d-flex justify-content-between mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-primary" id="prev-month"><span> <- </span></button>
+                        <p class="m-0 p-2" id="current-month"></p>
+                        <button class="btn btn-primary" id="next-month"><span> -> </span></button>
+                    </div>
+                </div>
+                <div class="table-responsive mb-2">
+                    <table class="table table-dark">
+                        <thead>
+                            <tr>
+                                <th scope="col">Összeg</th>
+                                <th scope="col">Leírás</th>
+                                <th scope="col">Dátum</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body">
+                            <!-- Ide kerülnek az adatok -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
