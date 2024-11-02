@@ -1,7 +1,9 @@
-// Initial transactions data
+// ==================== Globális változók ====================
+
+// Tranzakciók tárolása
 let transactions = [];
 
-// Monthly data for the chart
+// Diagram adatok
 let monthlyData = {
     labels: Array.from({ length: 12 }, (_, i) => new Date(0, i).toLocaleString('hu-HU', { month: 'short' })),
     datasets: [
@@ -18,17 +20,23 @@ let monthlyData = {
     ]
 };
 
-// URL
+// API beállítások
 const url = 'http://localhost:8000/transactions/';
-
-// Fetch options
 const options = {
     method: 'GET',
     headers: {
         'Accept': 'application/json'
-    },
-    // Távolítsuk el a 'mode: "no-cors"' opciót, ha van ilyen
+    }
 };
+
+// Táblázat elemek
+const months = ["január", "február", "március", "április", "május", "június", "július", "augusztus", "szeptember", "október", "november", "december"];
+let tableBody = document.getElementById("table-body");
+const sortSelect = document.getElementById("sort-select");
+const sortButton = document.getElementById("sort-button");
+let currentMonth = new Date().getMonth() + 1;
+
+// ==================== API műveletek ====================
 
 async function fetchTransactions() {
     try {
@@ -41,7 +49,8 @@ async function fetchTransactions() {
             transactions = data;
             updateTransactionList();
             updateBalance();
-            updateChart(); // Frissítsük a diagramot is
+            updateChart();
+            refreshTable();
         } else {
             throw new Error('A válasz nem egy tömb');
         }
@@ -51,7 +60,42 @@ async function fetchTransactions() {
     }
 }
 
+function addTransaction(type, amount, description) {
+    const newTransaction = {
+        amount: parseFloat(amount),
+        type,
+        description,
+        date: new Date().toISOString().split('T')[0]
+    }
+
+    let postOptions = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newTransaction)
+    }
+
+    fetch(url, postOptions)
+        .then(response => response.json())
+        .catch(error => console.error('Hiba a tranzakció hozzáadása során:', error));
+
+    updateTransactionList();
+    updateBalance();
+}
+
+function resetDatabase() {
+    fetch('http://localhost:8000/reset/', { method: 'POST' })
+        .then(() => location.reload());
+}
+
+// ==================== Diagram kezelés ====================
+
 function updateMonthlyData() {
+    // Nullázzuk az adatokat
+    monthlyData.datasets[0].data = Array(12).fill(0);
+    monthlyData.datasets[1].data = Array(12).fill(0);
+
     transactions.forEach(transaction => {
         const date = new Date(transaction.date);
         const month = date.getMonth();
@@ -65,7 +109,6 @@ function updateMonthlyData() {
     });
 }
 
-// Frissítsük a diagramot
 function updateChart() {
     updateMonthlyData();
     if (window.myChart instanceof Chart) {
@@ -76,7 +119,38 @@ function updateChart() {
     }
 }
 
-// Function to update the balance
+function initializeChart() {
+    const ctx = document.getElementById('monthlyChart').getContext('2d');
+    window.myChart = new Chart(ctx, {
+        type: 'bar',
+        data: monthlyData,
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function (value) {
+                            return value.toLocaleString('hu-HU') + ' Ft';
+                        }
+                    }
+                }
+            },
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Havi bevételek és kiadások'
+                }
+            }
+        }
+    });
+}
+
+// ==================== UI frissítések ====================
+
 function updateBalance() {
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth();
@@ -93,39 +167,24 @@ function updateBalance() {
     document.getElementById('balance').textContent = `${balance.toLocaleString('hu-HU')} Ft`;
 }
 
-// Function to add a new transaction
-function addTransaction(type, amount, description) {
-    const newTransaction = {
-        amount: parseFloat(amount),
-        type,
-        description,
-        date: new Date().toISOString().split('T')[0]
-    }
-
-    let options = {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(newTransaction)
-    }
-    fetch(url, options)
-        .then(response => response.json())
-        .catch(error => console.error('Hiba a tranzakció hozzáadása során:', error));
-
-    updateTransactionList();
-    updateBalance();
-}
-
-// Function to update the transaction list
 function updateTransactionList() {
     const transactionList = document.getElementById('transactionList');
     transactionList.innerHTML = '';
-    transactions.reverse().slice(0, 5).forEach(transaction => {
+
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+
+    const currentMonthTransactions = transactions.filter(transaction => {
+        const transactionDate = new Date(transaction.date);
+        return transactionDate.getMonth() === currentMonth &&
+            transactionDate.getFullYear() === currentYear;
+    });
+
+    currentMonthTransactions.reverse().slice(0, 5).forEach(transaction => {
         const li = document.createElement('li');
         li.className = 'list-group-item d-flex justify-content-between align-items-center';
 
-        // Formatting date
         const date = new Date(transaction.date);
         const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
@@ -147,49 +206,34 @@ function updateTransactionList() {
     });
 }
 
-// Function to reset the database
-function resetDatabase() {
-    fetch('http://localhost:8000/reset/', { method: 'POST' })
-        .then(() => location.reload());
-}
+function refreshTable() {
+    tableBody.innerHTML = '';
 
-// Initialize the chart
-function initializeChart() {
-    const ctx = document.getElementById('monthlyChart').getContext('2d');
-    window.myChart = new Chart(ctx, {
-        type: 'bar',
-        data: monthlyData,
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function (value, index, values) {
-                            return value.toLocaleString('hu-HU') + ' Ft';
-                        }
-                    }
-                }
-            },
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-                title: {
-                    display: true,
-                    text: 'Havi bevételek és kiadások'
-                }
-            }
+    transactions.forEach(transaction => {
+        let month = parseInt(transaction.date.split("-")[1]);
+        if (month === currentMonth) {
+            tableBody.innerHTML += `
+            <tr>
+                <td class="${transaction.type === "income" ? "text-success" : "text-danger"}">
+                    ${transaction.type === "income" ? "+" : "-"}${transaction.amount}Ft
+                </td>
+                <td>${transaction.description}</td>
+                <td>${transaction.date.split("T")[0]}</td>
+            </tr>
+            `;
         }
     });
 }
 
-// Event listener for save transaction button
+// ==================== Event Listeners ====================
+
 document.addEventListener('DOMContentLoaded', function () {
+    // Új tranzakció mentése
     document.getElementById('saveTransaction').addEventListener('click', function () {
         const type = document.querySelector('input[name="type"]:checked').value;
         const amount = document.getElementById('amount').value;
         const description = document.getElementById('description').value;
+
         if (amount && description) {
             addTransaction(type, amount, description)
             document.getElementById('transactionForm').reset();
@@ -198,10 +242,23 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Fetch transactions
-    fetchTransactions();
+    // Hónap váltó gombok
+    document.getElementById("current-month").innerText = months[currentMonth - 1];
 
-    // Initial update
+    document.getElementById("prev-month").addEventListener("click", () => {
+        currentMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+        document.getElementById("current-month").innerText = months[currentMonth - 1];
+        refreshTable();
+    });
+
+    document.getElementById("next-month").addEventListener("click", () => {
+        currentMonth = currentMonth === 12 ? 1 : currentMonth + 1;
+        document.getElementById("current-month").innerText = months[currentMonth - 1];
+        refreshTable();
+    });
+
+    // Kezdeti betöltés
+    fetchTransactions();
     updateTransactionList();
     updateBalance();
     initializeChart();

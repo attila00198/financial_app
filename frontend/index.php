@@ -14,6 +14,7 @@
     <div class="container my-5">
         <h1 class="mb-4">Pénzügyi Kimutatás</h1>
 
+        <!-- Balance -->
         <div class="row mb-4">
             <div class="col-md-4 mb-3">
                 <div class="card" style="min-height: 225px;">
@@ -25,6 +26,8 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Transaction List -->
             <div class="col-md-8">
                 <div class="card" style="min-height: 225px;">
                     <div class="card-body">
@@ -43,11 +46,35 @@
             </div>
         </div>
 
-        <div class="card">
+        <!-- Chart -->
+        <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title">Havi áttekintés</h5>
                 <canvas id="monthlyChart"></canvas>
             </div>
+        </div>
+
+        <!-- Table -->
+        <div class="d-flex justify-content-between mb-2">
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-primary" id="prev-month"><span> <- </span></button>
+                <p class="m-0 p-2" id="current-month"></p>
+                <button class="btn btn-primary" id="next-month"><span> -> </span></button>
+            </div>
+        </div>
+        <div class="table-responsive mb-2">
+            <table class="table table-dark">
+                <thead>
+                    <tr>
+                        <th scope="col">Összeg</th>
+                        <th scope="col">Leírás</th>
+                        <th scope="col">Dátum</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Ide kerülnek az adatok -->
+                </tbody>
+            </table>
         </div>
     </div>
 
